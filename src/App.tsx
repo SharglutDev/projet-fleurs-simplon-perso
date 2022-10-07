@@ -1,29 +1,18 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
+import Details from "./pages/Details";
+import Home from "./pages/Home";
 
 const App = () => {
-  const message = "Hello World";
-
-  const handleClick = (name: string) => {
-    alert(`Bonjour ${name}`);
-  };
-
-  const handleClickSansParem = () => {
-    alert(`Appel static`);
-  };
-
   return (
-    <div>
+    <BrowserRouter>
       <Navbar />
-      <p className="color-pink">{message}</p>
-      <button className="btn btn-success" onClick={() => handleClick("Joseph")}>
-        Test Joseph
-      </button>
-      <p>Coucou</p>
-      <button className="btn btn-primary" onClick={handleClickSansParem}>
-        Test
-      </button>
-    </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/details" element={<Details />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
