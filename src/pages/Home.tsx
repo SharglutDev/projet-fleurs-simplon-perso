@@ -1,6 +1,7 @@
-import { list_products } from '../data';
-import SideBar from '../components/SideBar';
-import { useState } from 'react';
+import { list_products } from "../data";
+import SideBar from "../components/SideBar";
+import { useState } from "react";
+import Searchbar from "../components/Searchbar";
 
 export interface Plante {
   id: string;
@@ -17,44 +18,59 @@ export interface Plante {
  */
 const listePlantes: Plante[] = list_products;
 let checkedCateg: string[] = [];
+let searchPlant = "";
 
 const Home = () => {
   const [listPlantDisplayed, setListPlantDisplayed] = useState<Plante[]>([
     ...listePlantes,
   ]);
 
+  // TODO : pour plusieurs filtres, faire une master fonction qui fera le seul setListPlantDisplayed
+
   const handleCheckCategories = (mesCategoriesChecked: string[]) => {
-    console.log('categories checked', mesCategoriesChecked);
-    /**
-     * Filtrer nos données ici
-     */
-    let resultFilteredPlants;
     checkedCateg = [...mesCategoriesChecked];
+    allFilter();
+  };
+
+  const handleSearch = (input: string) => {
+    searchPlant = input;
+    allFilter();
+  };
+
+  const allFilter = () => {
+    let resultFilteredPlants: Plante[] = [...listePlantes];
 
     if (checkedCateg.length > 0) {
-      resultFilteredPlants = listePlantes.filter((x) =>
-        checkedCateg.includes(x.category)
+      resultFilteredPlants = resultFilteredPlants.filter((plant) =>
+        checkedCateg.includes(plant.category)
       );
-    } else {
-      resultFilteredPlants = [...listePlantes];
+    }
+
+    if (searchPlant.length > 0) {
+      resultFilteredPlants = resultFilteredPlants.filter((plant) =>
+        plant.name.toLocaleLowerCase().includes(searchPlant.toLocaleLowerCase())
+      );
     }
 
     setListPlantDisplayed(resultFilteredPlants); // mettre à jour l'affichage de notre composant en fonction de la valeur de result
   };
 
   return (
-    <div className='d-flex align-items-stretch'>
+    <div className="d-flex align-items-stretch">
       <SideBar
         listElementPlant={listePlantes}
         onChangeCategoriesCheck={handleCheckCategories}
       />
-      <div className='container-fluid custom-main'>
-        {listPlantDisplayed.map((plante, i) => (
-          <li key={i}>
-            {plante.name} - {plante.category} - 💵 {plante.unitprice_ati}€ - ⭐
-            {plante.rating}
-          </li>
-        ))}{' '}
+      <div>
+        <Searchbar onChangeSearch={handleSearch} />
+        <div className="container-fluid custom-main">
+          {listPlantDisplayed.map((plante, i) => (
+            <li key={i}>
+              {plante.name} - {plante.category} - 💵 {plante.unitprice_ati}€ -
+              ⭐{plante.rating}
+            </li>
+          ))}{" "}
+        </div>
       </div>
     </div>
   );

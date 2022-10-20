@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import React, { useState } from 'react';
-import { Plante } from '../pages/Home';
+import _ from "lodash";
+import React, { useState } from "react";
+import { Plante } from "../pages/Home";
 
 interface filterSideBarProps {
   listElementPlant: Plante[];
@@ -26,24 +26,24 @@ const SideBar = ({
   }
 
   return (
-    <div className='custom-side-bar flex-shrink-0 bg-white border-end'>
-      <div className='p-3 border-bottom'>
-        <span className='fs-5 fw-semibold'>Filtres</span>
+    <div className="custom-side-bar flex-shrink-0 bg-white border-end">
+      <div className="p-3 border-bottom">
+        <span className="fs-5 fw-semibold">Filtres</span>
       </div>
-      <ul className='list-unstyled ps-0'>
-        <div className='p-3'>
-          <p className='mb-1 fs-5 fw-semibold'>Catégories</p>
+      <ul className="list-unstyled ps-0">
+        <div className="p-3">
+          <p className="mb-1 fs-5 fw-semibold">Catégories</p>
           {categories.map((cat, i) => (
-            <div className='form-check' key={i}>
+            <div className="form-check" key={i}>
               <input
-                className='form-check-input'
-                type='checkbox'
+                className="form-check-input"
+                type="checkbox"
                 value={cat}
                 id={cat}
                 onChange={handleCheck}
               />
-              <label className='form-check-label' htmlFor={cat}>
-                {' '}
+              <label className="form-check-label" htmlFor={cat}>
+                {" "}
                 {cat}
               </label>
             </div>
