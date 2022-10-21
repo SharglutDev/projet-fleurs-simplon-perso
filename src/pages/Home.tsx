@@ -19,13 +19,16 @@ export interface Plante {
 const listePlantes: Plante[] = list_products;
 let checkedCateg: string[] = [];
 let searchPlant = "";
+let priceRange: number[] = [];
 
 const Home = () => {
   const [listPlantDisplayed, setListPlantDisplayed] = useState<Plante[]>([
     ...listePlantes,
   ]);
 
-  // TODO : pour plusieurs filtres, faire une master fonction qui fera le seul setListPlantDisplayed
+  /**
+   * Fonctions qui récupèrent les states des filtres
+   */
 
   const handleCheckCategories = (mesCategoriesChecked: string[]) => {
     checkedCateg = [...mesCategoriesChecked];
@@ -36,6 +39,15 @@ const Home = () => {
     searchPlant = input;
     allFilter();
   };
+
+  const handlePriceFilter = (priceInputRange: number[]) => {
+    priceRange = priceInputRange;
+    allFilter();
+  };
+
+  /**
+   * Fonction principale
+   */
 
   const allFilter = () => {
     let resultFilteredPlants: Plante[] = [...listePlantes];
@@ -52,7 +64,15 @@ const Home = () => {
       );
     }
 
-    setListPlantDisplayed(resultFilteredPlants); // mettre à jour l'affichage de notre composant en fonction de la valeur de result
+    if (priceRange[1] !== 0) {
+      resultFilteredPlants = resultFilteredPlants.filter(
+        (plant) =>
+          plant.unitprice_ati >= priceRange[0] &&
+          plant.unitprice_ati <= priceRange[1]
+      );
+    }
+
+    setListPlantDisplayed(resultFilteredPlants);
   };
 
   return (
@@ -60,16 +80,37 @@ const Home = () => {
       <SideBar
         listElementPlant={listePlantes}
         onChangeCategoriesCheck={handleCheckCategories}
+        onPriceClick={handlePriceFilter}
       />
-      <div>
+      <div className="d-flex flex-column">
         <Searchbar onChangeSearch={handleSearch} />
         <div className="container-fluid custom-main">
-          {listPlantDisplayed.map((plante, i) => (
-            <li key={i}>
-              {plante.name} - {plante.category} - 💵 {plante.unitprice_ati}€ -
-              ⭐{plante.rating}
-            </li>
-          ))}{" "}
+          <div className="container">
+            <div className="row">
+              {listPlantDisplayed.map((plante, i) => (
+                <div key={i} className="col-4 my-3">
+                  <div
+                    className="card"
+                    style={{ width: "250px", height: "450px" }}
+                  >
+                    <img
+                      className="card-img-top"
+                      src={plante.url_picture}
+                      alt="Plant"
+                    />
+                    <div className="card-body d-flex flex-column justify-content-between">
+                      <h5 className="card-title">{plante.name}</h5>
+                      <p className="card-text">{plante.rating} ⭐</p>
+                      <div className="d-flex justify-content-around align-items-center">
+                        <span>{plante.unitprice_ati} €</span>
+                        <button className="btn btn-success">Pour moi !</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
