@@ -1,7 +1,8 @@
-import { list_products } from "../data";
+// import { list_products } from "../data";
 import SideBar from "../components/SideBar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Searchbar from "../components/Searchbar";
+import axios from "axios";
 
 export interface Plante {
   id: string;
@@ -16,15 +17,29 @@ export interface Plante {
 /**
  * Ici les constantes ou variables dont la modification de valeur ne provoquera pas directement de re-render
  */
-const listePlantes: Plante[] = list_products;
+let listePlantes: Plante[] = [];
 let checkedCateg: string[] = [];
 let searchPlant = "";
 let priceRange: number[] = [];
+let sortFilter: string = "";
 
 const Home = () => {
   const [listPlantDisplayed, setListPlantDisplayed] = useState<Plante[]>([
     ...listePlantes,
   ]);
+
+  useEffect(() => {
+    const getPlants = async () => {
+      try {
+        const response = await axios.get("http://localhost:3004/plants");
+        listePlantes = response.data;
+        setListPlantDisplayed(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getPlants();
+  }, []);
 
   /**
    * Fonctions qui récupèrent les states des filtres
@@ -42,6 +57,21 @@ const Home = () => {
 
   const handlePriceFilter = (priceInputRange: number[]) => {
     priceRange = priceInputRange;
+    allFilter();
+  };
+
+  const handlePriceSort = () => {
+    sortFilter = "price";
+    allFilter();
+  };
+
+  const handleAlphaSort = () => {
+    sortFilter = "alpha";
+    allFilter();
+  };
+
+  const handleRatingSort = () => {
+    sortFilter = "rating";
     allFilter();
   };
 
@@ -64,12 +94,33 @@ const Home = () => {
       );
     }
 
-    if (priceRange[1] !== 0) {
-      resultFilteredPlants = resultFilteredPlants.filter(
-        (plant) =>
+    if (priceRange[1] > 0) {
+      resultFilteredPlants = resultFilteredPlants.filter((plant) => {
+        if (priceRange[0] > priceRange[1])
+          priceRange = [priceRange[1], priceRange[0]];
+        return (
           plant.unitprice_ati >= priceRange[0] &&
           plant.unitprice_ati <= priceRange[1]
-      );
+        );
+      });
+    }
+
+    switch (sortFilter) {
+      case "price":
+        resultFilteredPlants = resultFilteredPlants.sort(
+          (a, b) => a.unitprice_ati - b.unitprice_ati
+        );
+        break;
+      case "alpha":
+        resultFilteredPlants = resultFilteredPlants.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        break;
+      case "rating":
+        resultFilteredPlants = resultFilteredPlants.sort(
+          (a, b) => a.rating - b.rating
+        );
+        break;
     }
 
     setListPlantDisplayed(resultFilteredPlants);
@@ -84,6 +135,27 @@ const Home = () => {
       />
       <div className="d-flex flex-column">
         <Searchbar onChangeSearch={handleSearch} />
+        <div className="container">
+          <span>Trier par : </span>
+          <button
+            className="btn btn-outline-success mx-1"
+            onClick={handlePriceSort}
+          >
+            Prix
+          </button>
+          <button
+            className="btn btn-outline-success mx-1"
+            onClick={handleAlphaSort}
+          >
+            Ordre alpha
+          </button>
+          <button
+            className="btn btn-outline-success mx-1"
+            onClick={handleRatingSort}
+          >
+            Avis
+          </button>
+        </div>
         <div className="container-fluid custom-main">
           <div className="container">
             <div className="row">
