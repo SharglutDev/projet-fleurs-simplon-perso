@@ -4,7 +4,7 @@ interface SearchBarProps {
 
 const Searchbar = ({ onChangeSearch }: SearchBarProps) => {
   return (
-    <div className="m-4">
+    <div>
       <input
         className="w-100 py-1 px-2"
         type="search"
