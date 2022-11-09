@@ -41,9 +41,9 @@ const Home = () => {
   useEffect(() => {
     const getPlants = async () => {
       try {
-        const response = await axios.get("http://localhost:3004/plants");
-        listePlantes = response.data;
-        setListPlantDisplayed(response.data);
+        const response = await axios.get("http://localhost:8080/api/v1/plants");
+        listePlantes = response.data.data;
+        setListPlantDisplayed(response.data.data);
       } catch (error) {
         console.error(error);
       }
@@ -172,10 +172,10 @@ const Home = () => {
         <div className="custom-main">
           <Row>
             {listPlantDisplayed.map((plante, i) => (
-              <Col xs={4} key={plante.id} className="gx-5 mb-5">
+              <Col xs={6} xxl={4} key={plante.id} className="gx-5 mb-5">
                 <Card
-                  className="position-relative"
-                  style={{ width: "300px", height: "500px" }}
+                  className="position-relative pt-4"
+                  style={{ width: "300px", height: "400px" }}
                 >
                   <FontAwesomeIcon
                     icon={farHeart}
@@ -189,14 +189,19 @@ const Home = () => {
                   />
                   <Card.Img
                     variant="top"
-                    src={plante.url_picture}
+                    src={`http://localhost:8080/assets/${plante.url_picture}`}
                     alt="Plant"
+                    style={{
+                      width: "200px",
+                      height: "200px",
+                      marginInline: "auto",
+                    }}
                   />
                   <Card.Body className="d-flex flex-column justify-content-between">
                     <Card.Title as="h5" className="card-title">
                       {plante.name}
                     </Card.Title>
-                    <span className="card-text my-4">
+                    <span className="card-text">
                       {[...new Array(5)].map((item, index) => (
                         <FontAwesomeIcon
                           icon={plante.rating <= index ? farStar : fasStar}
@@ -207,7 +212,7 @@ const Home = () => {
                       ))}
                     </span>
                     <div className="d-flex justify-content-between align-items-center">
-                      <span className="fw-bold">{plante.unitprice_ati} €</span>
+                      <span>{plante.unitprice_ati} €</span>
                       <Button variant="success">Pour moi !</Button>
                     </div>
                   </Card.Body>
