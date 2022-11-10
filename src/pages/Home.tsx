@@ -1,17 +1,11 @@
 // import { list_products } from "../data";
 import SideBar from "../components/SideBar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Searchbar from "../components/Searchbar";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faStar as fasStar,
-  faHeart as fasHeart,
-} from "@fortawesome/free-solid-svg-icons";
-import {
-  faStar as farStar,
-  faHeart as farHeart,
-} from "@fortawesome/free-regular-svg-icons";
+import { faStar as fasStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 import {
   Button,
   Container,
@@ -22,6 +16,7 @@ import {
   Dropdown,
 } from "react-bootstrap";
 import "./Home.css";
+import LikeButton from "../components/LikeButton";
 
 export interface Plante {
   id: string;
@@ -48,8 +43,6 @@ const Home = () => {
   const [listPlantDisplayed, setListPlantDisplayed] = useState<Plante[]>([
     ...listePlantes,
   ]);
-  const [isHover, setIsHover] = useState<boolean>(false);
-  const heartIconRef = useRef(null);
 
   useEffect(() => {
     const getPlants = async () => {
@@ -224,15 +217,7 @@ const Home = () => {
                   className="position-relative pt-4"
                   style={{ width: "300px", height: "400px" }}
                 >
-                  <FontAwesomeIcon
-                    icon={isHover ? fasHeart : farHeart}
-                    ref={heartIconRef}
-                    onMouseEnter={() => setIsHover(!isHover)}
-                    onMouseLeave={() => setIsHover(!isHover)}
-                    color="red"
-                    size="lg"
-                    className="heart-icon"
-                  />
+                  <LikeButton />
                   <Card.Img
                     variant="top"
                     src={`http://localhost:8080/assets/${plante.url_picture}`}
