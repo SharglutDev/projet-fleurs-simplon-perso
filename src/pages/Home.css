@@ -1,0 +1,11 @@
+.heart-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: rgb(25, 135, 84) !important;
+}

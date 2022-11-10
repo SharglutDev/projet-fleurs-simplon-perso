@@ -1,6 +1,6 @@
 // import { list_products } from "../data";
 import SideBar from "../components/SideBar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Searchbar from "../components/Searchbar";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,7 +12,16 @@ import {
   faStar as farStar,
   faHeart as farHeart,
 } from "@fortawesome/free-regular-svg-icons";
-import { Button, Container, Row, Col, Card } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  Row,
+  Col,
+  Card,
+  DropdownButton,
+  Dropdown,
+} from "react-bootstrap";
+import "./Home.css";
 
 export interface Plante {
   id: string;
@@ -31,12 +40,16 @@ let listePlantes: Plante[] = [];
 let checkedCateg: string[] = [];
 let searchPlant = "";
 let priceRange: number[] = [];
-let sortFilter: string = "";
+let priceSort: string = "";
+let alphaSort: string = "";
+let ratingSort: string = "";
 
 const Home = () => {
   const [listPlantDisplayed, setListPlantDisplayed] = useState<Plante[]>([
     ...listePlantes,
   ]);
+  const [isHover, setIsHover] = useState<boolean>(false);
+  const heartIconRef = useRef(null);
 
   useEffect(() => {
     const getPlants = async () => {
@@ -70,20 +83,25 @@ const Home = () => {
     allFilter();
   };
 
-  const handlePriceSort = () => {
-    sortFilter = "price";
+  const handlePriceSort = (key: string | null) => {
+    priceSort = key === "ascending" ? "priceAsc" : "priceDes";
+    console.log(priceSort);
     allFilter();
   };
 
-  const handleAlphaSort = () => {
-    sortFilter = "alpha";
+  const handleAlphaSort = (key: string | null) => {
+    alphaSort = key === "ascending" ? "alphaAsc" : "alphaDes";
+    console.log(alphaSort);
     allFilter();
   };
 
-  const handleRatingSort = () => {
-    sortFilter = "rating";
+  const handleRatingSort = (key: string | null) => {
+    ratingSort = key === "ascending" ? "ratingAsc" : "ratingDes";
+    console.log(ratingSort);
     allFilter();
   };
+
+  // TODO : gérer les filtres par un objet de recherche
 
   /**
    * Fonction principale
@@ -115,22 +133,34 @@ const Home = () => {
       });
     }
 
-    switch (sortFilter) {
-      case "price":
-        resultFilteredPlants = resultFilteredPlants.sort(
-          (a, b) => a.unitprice_ati - b.unitprice_ati
-        );
-        break;
-      case "alpha":
-        resultFilteredPlants = resultFilteredPlants.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-        break;
-      case "rating":
-        resultFilteredPlants = resultFilteredPlants.sort(
-          (a, b) => a.rating - b.rating
-        );
-        break;
+    if (priceSort === "priceAsc") {
+      resultFilteredPlants = resultFilteredPlants.sort(
+        (a, b) => a.unitprice_ati - b.unitprice_ati
+      );
+    } else if (priceSort === "priceDes") {
+      resultFilteredPlants = resultFilteredPlants.sort(
+        (a, b) => b.unitprice_ati - a.unitprice_ati
+      );
+    }
+
+    if (alphaSort === "alphaAsc") {
+      resultFilteredPlants = resultFilteredPlants.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+    } else if (alphaSort === "alphaDes") {
+      resultFilteredPlants = resultFilteredPlants.sort((a, b) =>
+        b.name.localeCompare(a.name)
+      );
+    }
+
+    if (ratingSort === "ratingAsc") {
+      resultFilteredPlants = resultFilteredPlants.sort(
+        (a, b) => a.rating - b.rating
+      );
+    } else if (ratingSort === "ratingDes") {
+      resultFilteredPlants = resultFilteredPlants.sort(
+        (a, b) => b.rating - a.rating
+      );
     }
 
     setListPlantDisplayed(resultFilteredPlants);
@@ -143,49 +173,65 @@ const Home = () => {
         onChangeCategoriesCheck={handleCheckCategories}
         onPriceClick={handlePriceFilter}
       />
-      <Container fluid className="d-flex flex-column mt-3">
+      <Container fluid className="d-flex flex-column mt-3 mx-3">
         <Searchbar onChangeSearch={handleSearch} />
         <div className="my-3">
           <span>Trier par : </span>
-          <Button
-            variant="outline-success"
-            className="mx-1"
-            onClick={handlePriceSort}
-          >
-            Prix
-          </Button>
-          <Button
-            variant="outline-success"
-            className="mx-1"
-            onClick={handleAlphaSort}
-          >
-            Ordre alpha
-          </Button>
-          <Button
-            variant="outline-success"
-            className="mx-1"
-            onClick={handleRatingSort}
-          >
-            Avis
-          </Button>
+          <div className="d-flex mt-1">
+            <DropdownButton
+              variant="outline-success"
+              className="me-2"
+              title="Prix"
+              id="sortByPrice"
+              onSelect={handlePriceSort}
+            >
+              <Dropdown.Item eventKey="ascending">Tri croissant</Dropdown.Item>
+              <Dropdown.Item eventKey="descending">
+                Tri décroissant
+              </Dropdown.Item>
+            </DropdownButton>
+            <DropdownButton
+              variant="outline-success"
+              className="me-2"
+              title="Ordre Alpha"
+              id="sortByChar"
+              onSelect={handleAlphaSort}
+            >
+              <Dropdown.Item eventKey="ascending">Tri croissant</Dropdown.Item>
+              <Dropdown.Item eventKey="descending">
+                Tri décroissant
+              </Dropdown.Item>
+            </DropdownButton>
+            <DropdownButton
+              variant="outline-success"
+              className="me-2"
+              title="Avis"
+              id="sortByRating"
+              onSelect={handleRatingSort}
+            >
+              <Dropdown.Item eventKey="ascending">Tri croissant</Dropdown.Item>
+              <Dropdown.Item eventKey="descending">
+                Tri décroissant
+              </Dropdown.Item>
+            </DropdownButton>
+          </div>
         </div>
-        <div className="custom-main">
+        <div className="custom-main mt-3">
           <Row>
             {listPlantDisplayed.map((plante, i) => (
-              <Col xs={6} xxl={4} key={plante.id} className="gx-5 mb-5">
+              <Col xs={6} xxl={4} key={plante.id} className="mb-5">
                 <Card
                   className="position-relative pt-4"
                   style={{ width: "300px", height: "400px" }}
                 >
                   <FontAwesomeIcon
-                    icon={farHeart}
+                    icon={isHover ? fasHeart : farHeart}
+                    ref={heartIconRef}
+                    onMouseEnter={() => setIsHover(!isHover)}
+                    onMouseLeave={() => setIsHover(!isHover)}
                     color="red"
                     size="lg"
-                    style={{
-                      position: "absolute",
-                      top: "20px",
-                      right: "20px",
-                    }}
+                    className="heart-icon"
                   />
                   <Card.Img
                     variant="top"
@@ -198,9 +244,8 @@ const Home = () => {
                     }}
                   />
                   <Card.Body className="d-flex flex-column justify-content-between">
-                    <Card.Title as="h5" className="card-title">
-                      {plante.name}
-                    </Card.Title>
+                    <Card.Title as="h5">{plante.name}</Card.Title>
+                    <Card.Text>{plante.category}</Card.Text>
                     <span className="card-text">
                       {[...new Array(5)].map((item, index) => (
                         <FontAwesomeIcon

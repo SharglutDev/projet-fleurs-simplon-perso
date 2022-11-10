@@ -1,6 +1,10 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import React, { useState } from "react";
+import { Button } from "react-bootstrap";
 import { Plante } from "../pages/Home";
+import { faStar as fasStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
 interface filterSideBarProps {
   listElementPlant: Plante[];
@@ -17,6 +21,7 @@ const SideBar = ({
   const [checkCategories, setCheckCategories] = useState<string[]>([]);
   const [minMax, setMinMax] = useState([0, 0]);
   let [min, max] = minMax;
+  const [isHover, setIsHover] = useState<boolean>(false);
 
   function handleCheck(e: React.ChangeEvent<HTMLInputElement>) {
     let tab: string[] = [];
@@ -78,9 +83,23 @@ const SideBar = ({
             onChange={(e) => setMinMax([min, parseInt(e.currentTarget.value)])}
           />
         </div>
-        <button className="btn btn-success d-flex mt-3" onClick={handleClick}>
+        <Button variant="success" className="mt-3" onClick={handleClick}>
           Valider
-        </button>
+        </Button>
+      </div>
+      <div className="p-3 border-bottom">
+        <h3 className="mb-1 fs-5 fw-semibold">Avis</h3>
+        {[...new Array(5)].map((item, index) => (
+          <FontAwesomeIcon
+            key={index}
+            icon={isHover ? fasStar : farStar}
+            onMouseEnter={() => setIsHover(true)}
+            onMouseLeave={() => setIsHover(false)}
+            color="rgb(245, 200, 66)"
+            size="lg"
+            style={{ cursor: "pointer" }}
+          />
+        ))}
       </div>
     </div>
   );
