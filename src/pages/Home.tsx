@@ -2,7 +2,7 @@
 import SideBar from "../components/SideBar";
 import { useEffect, useState } from "react";
 import Searchbar from "../components/Searchbar";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as fasStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
@@ -17,9 +17,10 @@ import {
 } from "react-bootstrap";
 import "./Home.css";
 import LikeButton from "../components/LikeButton";
+import { Link } from "react-router-dom";
 
 export interface Plante {
-  id: string;
+  id?: string;
   name: string;
   unitprice_ati: number;
   quantity: number;
@@ -35,6 +36,7 @@ let listePlantes: Plante[] = [];
 let checkedCateg: string[] = [];
 let searchPlant = "";
 let priceRange: number[] = [];
+let rating: number = 0;
 let priceSort: string = "";
 let alphaSort: string = "";
 let ratingSort: string = "";
@@ -47,7 +49,9 @@ const Home = () => {
   useEffect(() => {
     const getPlants = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/v1/plants");
+        const response: AxiosResponse<{ data: Plante[] }> = await axios.get(
+          "http://localhost:8080/api/v1/plants"
+        );
         listePlantes = response.data.data;
         setListPlantDisplayed(response.data.data);
       } catch (error) {
@@ -60,6 +64,8 @@ const Home = () => {
   /**
    * Fonctions qui récupèrent les states des filtres
    */
+
+  // ***** Filtres *****
 
   const handleCheckCategories = (mesCategoriesChecked: string[]) => {
     checkedCateg = [...mesCategoriesChecked];
@@ -75,6 +81,13 @@ const Home = () => {
     priceRange = priceInputRange;
     allFilter();
   };
+
+  const handleRatingFilter = (ratingNumber: number) => {
+    rating = ratingNumber;
+    allFilter();
+  };
+
+  // ***** Tris *****
 
   const handlePriceSort = (key: string | null) => {
     priceSort = key === "ascending" ? "priceAsc" : "priceDes";
@@ -112,6 +125,12 @@ const Home = () => {
     if (searchPlant.length > 0) {
       resultFilteredPlants = resultFilteredPlants.filter((plant) =>
         plant.name.toLocaleLowerCase().includes(searchPlant.toLocaleLowerCase())
+      );
+    }
+
+    if (rating > 0) {
+      resultFilteredPlants = resultFilteredPlants.filter(
+        (plant) => plant.rating === rating
       );
     }
 
@@ -165,6 +184,7 @@ const Home = () => {
         listElementPlant={listePlantes}
         onChangeCategoriesCheck={handleCheckCategories}
         onPriceClick={handlePriceFilter}
+        onRatingClick={handleRatingFilter}
       />
       <Container fluid className="d-flex flex-column mt-3 mx-3">
         <Searchbar onChangeSearch={handleSearch} />
@@ -213,40 +233,42 @@ const Home = () => {
           <Row>
             {listPlantDisplayed.map((plante, i) => (
               <Col xs={6} xxl={4} key={plante.id} className="mb-5">
-                <Card
-                  className="position-relative pt-4"
-                  style={{ width: "300px", height: "400px" }}
-                >
-                  <LikeButton />
-                  <Card.Img
-                    variant="top"
-                    src={`http://localhost:8080/assets/${plante.url_picture}`}
-                    alt="Plant"
-                    style={{
-                      width: "200px",
-                      height: "200px",
-                      marginInline: "auto",
-                    }}
-                  />
-                  <Card.Body className="d-flex flex-column justify-content-between">
-                    <Card.Title as="h5">{plante.name}</Card.Title>
-                    <Card.Text>{plante.category}</Card.Text>
-                    <span className="card-text">
-                      {[...new Array(5)].map((item, index) => (
-                        <FontAwesomeIcon
-                          icon={plante.rating <= index ? farStar : fasStar}
-                          color="rgb(245, 200, 66)"
-                          size="lg"
-                          key={index}
-                        />
-                      ))}
-                    </span>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span>{plante.unitprice_ati} €</span>
-                      <Button variant="success">Pour moi !</Button>
-                    </div>
-                  </Card.Body>
-                </Card>
+                <Link to={`plant/${plante.id}`}>
+                  <Card
+                    className="position-relative pt-4"
+                    style={{ width: "300px", height: "400px" }}
+                  >
+                    <LikeButton />
+                    <Card.Img
+                      variant="top"
+                      src={`http://localhost:8080/assets/${plante.url_picture}`}
+                      alt="Plant"
+                      style={{
+                        width: "200px",
+                        height: "200px",
+                        marginInline: "auto",
+                      }}
+                    />
+                    <Card.Body className="d-flex flex-column justify-content-between">
+                      <Card.Title as="h5">{plante.name}</Card.Title>
+                      <Card.Text>{plante.category}</Card.Text>
+                      <span className="card-text">
+                        {[...new Array(5)].map((item, index) => (
+                          <FontAwesomeIcon
+                            icon={plante.rating <= index ? farStar : fasStar}
+                            color="rgb(245, 200, 66)"
+                            size="lg"
+                            key={index}
+                          />
+                        ))}
+                      </span>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span>{plante.unitprice_ati} €</span>
+                        <Button variant="success">Pour moi !</Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Link>
               </Col>
             ))}
           </Row>

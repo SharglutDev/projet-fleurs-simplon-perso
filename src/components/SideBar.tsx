@@ -5,23 +5,27 @@ import _ from "lodash";
 import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 import { Plante } from "../pages/Home";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 interface filterSideBarProps {
   listElementPlant: Plante[];
   onChangeCategoriesCheck: { (checkCategories: string[]): void };
   onPriceClick: { (priceFilter: number[]): void };
+  onRatingClick: { (ratingFilter: number): void };
 }
 
 const SideBar = ({
   listElementPlant,
   onChangeCategoriesCheck,
   onPriceClick,
+  onRatingClick,
 }: filterSideBarProps) => {
   const categories = _.uniq(listElementPlant.map((plante) => plante.category));
   const [checkCategories, setCheckCategories] = useState<string[]>([]);
   const [minMax, setMinMax] = useState([0, 0]);
   let [min, max] = minMax;
-  const [rating, setRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [rating, setRating] = useState<number | undefined>();
 
   function handleCheck(e: React.ChangeEvent<HTMLInputElement>) {
     let tab: string[] = [];
@@ -34,9 +38,22 @@ const SideBar = ({
     onChangeCategoriesCheck(tab);
   }
 
-  const handleClick = () => {
+  const handlePriceClick = () => {
     let priceTab: number[] = [...minMax];
     onPriceClick(priceTab);
+  };
+
+  const handleRatingClick = (index: number) => {
+    setRating(index);
+    onRatingClick(index);
+  };
+
+  const handleStarIcon = (index: number): IconDefinition => {
+    if (rating) {
+      return index <= rating ? fasStar : farStar;
+    } else {
+      return index <= hoverRating ? fasStar : farStar;
+    }
   };
 
   return (
@@ -83,21 +100,22 @@ const SideBar = ({
             onChange={(e) => setMinMax([min, parseInt(e.currentTarget.value)])}
           />
         </div>
-        <Button variant="success" className="mt-3" onClick={handleClick}>
+        <Button variant="success" className="mt-3" onClick={handlePriceClick}>
           Valider
         </Button>
       </div>
       <div className="p-3 border-bottom">
         <h3 className="mb-1 fs-5 fw-semibold">Avis</h3>
-        <div onMouseLeave={() => setRating(0)}>
+        <div onMouseLeave={() => setHoverRating(0)}>
           {[...new Array(5)].map((item, index) => {
             index++;
-            // <StarButton key={index} index={index} />
             return (
               <FontAwesomeIcon
-                icon={index <= rating ? fasStar : farStar}
-                onMouseEnter={() => setRating(index)}
-                onMouseLeave={() => setRating(index - 1)}
+                key={index}
+                icon={handleStarIcon(index)}
+                onMouseEnter={() => setHoverRating(index)}
+                onMouseLeave={() => setHoverRating(index - 1)}
+                onClick={() => handleRatingClick(index)}
                 color="rgb(245, 200, 66)"
                 size="lg"
                 style={{ cursor: "pointer" }}
