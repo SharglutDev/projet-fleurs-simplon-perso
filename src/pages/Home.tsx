@@ -1,11 +1,10 @@
-// import { list_products } from "../data";
-import SideBar from "../components/SideBar";
-import { useEffect, useState } from "react";
-import Searchbar from "../components/Searchbar";
-import axios, { AxiosResponse } from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar as fasStar } from "@fortawesome/free-solid-svg-icons";
-import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
+import SideBar from '../components/SideBar';
+import { useEffect, useState } from 'react';
+import Searchbar from '../components/Searchbar';
+import axios, { AxiosResponse } from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar as fasStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar as farStar } from '@fortawesome/free-regular-svg-icons';
 import {
   Button,
   Container,
@@ -14,10 +13,12 @@ import {
   Card,
   DropdownButton,
   Dropdown,
-} from "react-bootstrap";
-import "./Home.css";
-import LikeButton from "../components/LikeButton";
-import { Link } from "react-router-dom";
+} from 'react-bootstrap';
+import './Home.css';
+import LikeButton from '../components/LikeButton';
+import { Link, useNavigate } from 'react-router-dom';
+import { ToastProps } from '../App';
+import { useToast } from '../contexts/ToastContext';
 
 export interface Plante {
   id?: string;
@@ -34,32 +35,54 @@ export interface Plante {
  */
 let listePlantes: Plante[] = [];
 let checkedCateg: string[] = [];
-let searchPlant = "";
+let searchPlant = '';
 let priceRange: number[] = [];
 let rating: number = 0;
-let priceSort: string = "";
-let alphaSort: string = "";
-let ratingSort: string = "";
+let priceSort: string = '';
+let alphaSort: string = '';
+let ratingSort: string = '';
 
 const Home = () => {
   const [listPlantDisplayed, setListPlantDisplayed] = useState<Plante[]>([
     ...listePlantes,
   ]);
 
+  const { handleToast } = useToast();
+
+  // *** React-Router-Dom hook to redirect to a page ***
+  const redirectToLogin = useNavigate();
+
+  // *** get plants data
   useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    console.log(`Home page token : ${accessToken}`);
+
+    // if (!accessToken) {
+    //   redirectToLogin('/login');
+    //   handleToast({
+    //     color: 'info',
+    //     message: 'You need to be logged in to acces this page',
+    //   });
+    // }
+
     const getPlants = async () => {
       try {
         const response: AxiosResponse<{ data: Plante[] }> = await axios.get(
-          "http://localhost:8080/api/v1/plants"
+          'http://localhost:8080/api/v1/plants',
+          {
+            headers: {
+              authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         listePlantes = response.data.data;
         setListPlantDisplayed(response.data.data);
       } catch (error) {
-        console.error(error);
+        console.error('error : ', error);
       }
     };
     getPlants();
-  }, []);
+  }, [redirectToLogin, handleToast]);
 
   /**
    * Fonctions qui récupèrent les states des filtres
@@ -90,19 +113,19 @@ const Home = () => {
   // ***** Tris *****
 
   const handlePriceSort = (key: string | null) => {
-    priceSort = key === "ascending" ? "priceAsc" : "priceDes";
+    priceSort = key === 'ascending' ? 'priceAsc' : 'priceDes';
     console.log(priceSort);
     allFilter();
   };
 
   const handleAlphaSort = (key: string | null) => {
-    alphaSort = key === "ascending" ? "alphaAsc" : "alphaDes";
+    alphaSort = key === 'ascending' ? 'alphaAsc' : 'alphaDes';
     console.log(alphaSort);
     allFilter();
   };
 
   const handleRatingSort = (key: string | null) => {
-    ratingSort = key === "ascending" ? "ratingAsc" : "ratingDes";
+    ratingSort = key === 'ascending' ? 'ratingAsc' : 'ratingDes';
     console.log(ratingSort);
     allFilter();
   };
@@ -145,31 +168,31 @@ const Home = () => {
       });
     }
 
-    if (priceSort === "priceAsc") {
+    if (priceSort === 'priceAsc') {
       resultFilteredPlants = resultFilteredPlants.sort(
         (a, b) => a.unitprice_ati - b.unitprice_ati
       );
-    } else if (priceSort === "priceDes") {
+    } else if (priceSort === 'priceDes') {
       resultFilteredPlants = resultFilteredPlants.sort(
         (a, b) => b.unitprice_ati - a.unitprice_ati
       );
     }
 
-    if (alphaSort === "alphaAsc") {
+    if (alphaSort === 'alphaAsc') {
       resultFilteredPlants = resultFilteredPlants.sort((a, b) =>
         a.name.localeCompare(b.name)
       );
-    } else if (alphaSort === "alphaDes") {
+    } else if (alphaSort === 'alphaDes') {
       resultFilteredPlants = resultFilteredPlants.sort((a, b) =>
         b.name.localeCompare(a.name)
       );
     }
 
-    if (ratingSort === "ratingAsc") {
+    if (ratingSort === 'ratingAsc') {
       resultFilteredPlants = resultFilteredPlants.sort(
         (a, b) => a.rating - b.rating
       );
-    } else if (ratingSort === "ratingDes") {
+    } else if (ratingSort === 'ratingDes') {
       resultFilteredPlants = resultFilteredPlants.sort(
         (a, b) => b.rating - a.rating
       );
@@ -179,92 +202,92 @@ const Home = () => {
   };
 
   return (
-    <div className="d-flex align-items-stretch">
+    <div className='d-flex align-items-stretch'>
       <SideBar
         listElementPlant={listePlantes}
         onChangeCategoriesCheck={handleCheckCategories}
         onPriceClick={handlePriceFilter}
         onRatingClick={handleRatingFilter}
       />
-      <Container fluid className="d-flex flex-column mt-3 mx-3">
+      <Container fluid className='d-flex flex-column mt-3 mx-3'>
         <Searchbar onChangeSearch={handleSearch} />
-        <div className="my-3">
+        <div className='my-3'>
           <span>Trier par : </span>
-          <div className="d-flex mt-1">
+          <div className='d-flex mt-1'>
             <DropdownButton
-              variant="outline-success"
-              className="me-2"
-              title="Prix"
-              id="sortByPrice"
+              variant='outline-success'
+              className='me-2'
+              title='Prix'
+              id='sortByPrice'
               onSelect={handlePriceSort}
             >
-              <Dropdown.Item eventKey="ascending">Tri croissant</Dropdown.Item>
-              <Dropdown.Item eventKey="descending">
+              <Dropdown.Item eventKey='ascending'>Tri croissant</Dropdown.Item>
+              <Dropdown.Item eventKey='descending'>
                 Tri décroissant
               </Dropdown.Item>
             </DropdownButton>
             <DropdownButton
-              variant="outline-success"
-              className="me-2"
-              title="Ordre Alpha"
-              id="sortByChar"
+              variant='outline-success'
+              className='me-2'
+              title='Ordre Alpha'
+              id='sortByChar'
               onSelect={handleAlphaSort}
             >
-              <Dropdown.Item eventKey="ascending">Tri croissant</Dropdown.Item>
-              <Dropdown.Item eventKey="descending">
+              <Dropdown.Item eventKey='ascending'>Tri croissant</Dropdown.Item>
+              <Dropdown.Item eventKey='descending'>
                 Tri décroissant
               </Dropdown.Item>
             </DropdownButton>
             <DropdownButton
-              variant="outline-success"
-              className="me-2"
-              title="Avis"
-              id="sortByRating"
+              variant='outline-success'
+              className='me-2'
+              title='Avis'
+              id='sortByRating'
               onSelect={handleRatingSort}
             >
-              <Dropdown.Item eventKey="ascending">Tri croissant</Dropdown.Item>
-              <Dropdown.Item eventKey="descending">
+              <Dropdown.Item eventKey='ascending'>Tri croissant</Dropdown.Item>
+              <Dropdown.Item eventKey='descending'>
                 Tri décroissant
               </Dropdown.Item>
             </DropdownButton>
           </div>
         </div>
-        <div className="custom-main mt-3">
+        <div className='custom-main mt-3'>
           <Row>
             {listPlantDisplayed.map((plante, i) => (
-              <Col xs={6} xxl={4} key={plante.id} className="mb-5">
+              <Col xs={6} xxl={4} key={plante.id} className='mb-5'>
                 <Link to={`plant/${plante.id}`}>
                   <Card
-                    className="position-relative pt-4"
-                    style={{ width: "300px", height: "400px" }}
+                    className='position-relative pt-4'
+                    style={{ width: '300px', height: '400px' }}
                   >
                     <LikeButton />
                     <Card.Img
-                      variant="top"
+                      variant='top'
                       src={`http://localhost:8080/assets/${plante.url_picture}`}
-                      alt="Plant"
+                      alt='Plant'
                       style={{
-                        width: "200px",
-                        height: "200px",
-                        marginInline: "auto",
+                        width: '200px',
+                        height: '200px',
+                        marginInline: 'auto',
                       }}
                     />
-                    <Card.Body className="d-flex flex-column justify-content-between">
-                      <Card.Title as="h5">{plante.name}</Card.Title>
+                    <Card.Body className='d-flex flex-column justify-content-between'>
+                      <Card.Title as='h5'>{plante.name}</Card.Title>
                       <Card.Text>{plante.category}</Card.Text>
-                      <span className="card-text">
+                      <span className='card-text'>
                         {[...new Array(5)].map((item, index) => (
                           <FontAwesomeIcon
                             icon={plante.rating <= index ? farStar : fasStar}
-                            color="rgb(245, 200, 66)"
-                            size="lg"
+                            color='rgb(245, 200, 66)'
+                            size='lg'
                             key={index}
                           />
                         ))}
                       </span>
-                      <div className="d-flex justify-content-between align-items-center">
+                      <div className='d-flex justify-content-between align-items-center'>
                         <span>{plante.unitprice_ati} €</span>
-                        <Button variant="success">Pour moi !</Button>
+                        <Button variant='success'>Pour moi !</Button>
                       </div>
                     </Card.Body>
                   </Card>

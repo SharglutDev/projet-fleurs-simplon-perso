@@ -1,18 +1,24 @@
-import { Button, FloatingLabel, Form } from "react-bootstrap";
-import _ from "lodash";
-import axios, { AxiosResponse } from "axios";
-import { Plante } from "./Home";
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar as fasStar } from "@fortawesome/free-solid-svg-icons";
-import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
+import { Button, FloatingLabel, Form, Placeholder } from 'react-bootstrap';
+import _ from 'lodash';
+import axios, { AxiosResponse } from 'axios';
+import { Plante } from './Home';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar as fasStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar as farStar } from '@fortawesome/free-regular-svg-icons';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 const CreatePlant = () => {
   const [plants, setPlants] = useState<Plante[]>([]);
   const [price, setPrice] = useState<number>(30);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [rating, setRating] = useState<number | undefined>();
-  const [createMessage, setCreateMessage] = useState<string>("");
+  const [createMessage, setCreateMessage] = useState<string>('');
+
+  const { currentUser, authLoading } = useAuth();
+  const { handleToast } = useToast();
 
   const nameRef = useRef<HTMLInputElement>(null);
   const quantityRef = useRef<HTMLInputElement>(null);
@@ -20,11 +26,31 @@ const CreatePlant = () => {
   const imageRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
+    // const accessToken = localStorage.getItem("accessToken");
+    // console.log(`Create Page Token : ${accessToken}`);
+
+    // if (!accessToken) {
+    //   redirectToLogin("/login");
+    //   onCreateNotLogged({
+    //     color: "info",
+    //     message: "You need to be logged in to acces this page",
+    //   });
+    // }
+
     const getAllPlants = async () => {
-      const plants: AxiosResponse<{ data: Plante[] }> = await axios.get(
-        "http://localhost:8080/api/v1/plants"
-      );
-      setPlants(plants.data.data);
+      try {
+        const plants: AxiosResponse<{ data: Plante[] }> = await axios.get(
+          'http://localhost:8080/api/v1/plants'
+          // {
+          //   headers: {
+          //     authorization: `Bearer ${accessToken}`,
+          //   },
+          // }
+        );
+        setPlants(plants.data.data);
+      } catch (error) {
+        console.log('token error : ', error);
+      }
     };
     getAllPlants();
   }, []);
@@ -63,7 +89,8 @@ const CreatePlant = () => {
           newPlant
         );
         console.log(response);
-        setCreateMessage(response.data.message);
+        handleToast({ color: 'success', message: response.data.message });
+        // setCreateMessage(response.data.message);
       } catch (err) {
         let message: string;
         if (axios.isAxiosError(err) && err.response) {
@@ -71,15 +98,15 @@ const CreatePlant = () => {
         } else {
           message = `Unknown error : ${err}`;
         }
-        setCreateMessage(message);
+        handleToast({ color: 'success', message: message });
       }
-      nameRef.current.value = "";
+      nameRef.current.value = '';
       setPrice(30);
-      quantityRef.current.value = "";
-      categoryRef.current.value = "";
+      quantityRef.current.value = '';
+      categoryRef.current.value = '';
       setHoverRating(0);
       setRating(undefined);
-      imageRef.current.value = "";
+      imageRef.current.value = '';
     }
   };
 
@@ -89,28 +116,75 @@ const CreatePlant = () => {
   };
 
   return (
-    <div className="mx-auto" style={{ width: "500px" }}>
-      <h1 className="text-center my-5">Add a Plant</h1>
+    // <div>
+    //   {authLoading ? (
+    //     <div className='mx-auto' style={{ width: '500px' }}>
+    //       <h1 className='text-center my-5'>
+    //         <Placeholder animation='glow'>
+    //           <Placeholder xs={6} />
+    //         </Placeholder>
+    //       </h1>
+    //       <Form>
+    //         <Form.Group className='mb-3'>
+    //           <Placeholder animation='glow'>
+    //             <Placeholder as={Form.Control} xs={10} />
+    //           </Placeholder>
+    //         </Form.Group>
+    //         <Form.Group className='mb-3'>
+    //           <Placeholder animation='glow'>
+    //             <Placeholder as={Form.Control} xs={10} />
+    //           </Placeholder>
+    //         </Form.Group>
+    //         <Form.Group className='mb-3'>
+    //           <Placeholder animation='glow'>
+    //             <Placeholder as={Form.Control} xs={10} />
+    //           </Placeholder>
+    //         </Form.Group>
+    //         <Form.Group className='mb-3'>
+    //           <Placeholder animation='glow'>
+    //             <Placeholder as={Form.Control} xs={10} />
+    //           </Placeholder>
+    //         </Form.Group>
+    //         <Form.Group className='mb-3'>
+    //           <Placeholder animation='glow'>
+    //             <Placeholder as={Form.Control} xs={10} />
+    //           </Placeholder>
+    //         </Form.Group>
+    //         <Form.Group className='mb-3'>
+    //           <Placeholder animation='glow'>
+    //             <Placeholder as={Form.Control} xs={10} />
+    //           </Placeholder>
+    //         </Form.Group>
+    //         <Placeholder animation='glow' size='lg'>
+    //           <Placeholder.Button xs={4} />
+    //         </Placeholder>
+    //       </Form>
+    //     </div>
+    //   ) : currentUser ? (
+    //     <Navigate to='/login' />
+    //   ) : (
+    <div className='mx-auto' style={{ width: '500px' }}>
+      <h1 className='text-center my-5'>Add a Plant</h1>
       <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <FloatingLabel label="Name">
+        <Form.Group className='mb-3'>
+          <FloatingLabel label='Name'>
             <Form.Control
               ref={nameRef}
-              type="text"
-              placeholder="Enter name"
-              onFocus={() => setCreateMessage("")}
+              type='text'
+              placeholder='Enter name'
+              onFocus={() => setCreateMessage('')}
               required
             />
           </FloatingLabel>
         </Form.Group>
 
         <Form.Group
-          className="mb-3"
-          controlId="formBasicPassword"
+          className='mb-3'
+          controlId='formBasicPassword'
           style={{
-            border: "1px solid #ced4da",
-            borderRadius: "0.375rem",
-            padding: "1rem 0.75rem",
+            border: '1px solid #ced4da',
+            borderRadius: '0.375rem',
+            padding: '1rem 0.75rem',
           }}
         >
           <Form.Label>Price</Form.Label>
@@ -124,24 +198,24 @@ const CreatePlant = () => {
           <Form.Text>{price} €</Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <FloatingLabel label="Quantity">
+        <Form.Group className='mb-3'>
+          <FloatingLabel label='Quantity'>
             <Form.Control
               ref={quantityRef}
-              type="number"
+              type='number'
               min={1}
               max={30}
-              placeholder="Quantity"
+              placeholder='Quantity'
               required
             />
           </FloatingLabel>
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <FloatingLabel label="Category">
+        <Form.Group className='mb-3'>
+          <FloatingLabel label='Category'>
             <Form.Select
               ref={categoryRef}
-              aria-label="category selector"
+              aria-label='category selector'
               required
             >
               <option>Choose Category</option>
@@ -155,15 +229,15 @@ const CreatePlant = () => {
         </Form.Group>
 
         <Form.Group
-          className="mb-3"
+          className='mb-3'
           style={{
-            border: "1px solid #ced4da",
-            borderRadius: "0.375rem",
-            padding: "1rem 0.75rem",
+            border: '1px solid #ced4da',
+            borderRadius: '0.375rem',
+            padding: '1rem 0.75rem',
           }}
         >
           <Form.Label>Rating</Form.Label>
-          <Form.Text as="div">
+          <Form.Text as='div'>
             {[...new Array(5)].map((item, index) => {
               index++;
               return (
@@ -173,20 +247,20 @@ const CreatePlant = () => {
                   onMouseEnter={() => setHoverRating(index)}
                   onMouseLeave={() => setHoverRating(index - 1)}
                   onClick={() => setRating(index)}
-                  color="rgb(245, 200, 66)"
-                  size="xl"
-                  style={{ cursor: "pointer" }}
+                  color='rgb(245, 200, 66)'
+                  size='xl'
+                  style={{ cursor: 'pointer' }}
                 />
               );
             })}
           </Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <FloatingLabel label="Image">
+        <Form.Group className='mb-3'>
+          <FloatingLabel label='Image'>
             <Form.Select
               ref={imageRef}
-              aria-label="plants images selector"
+              aria-label='plants images selector'
               required
             >
               <option>Choose Plant Image</option>
@@ -198,14 +272,16 @@ const CreatePlant = () => {
             </Form.Select>
           </FloatingLabel>
         </Form.Group>
-        <Button variant="primary" type="submit" className="mt-1">
+        <Button variant='primary' type='submit' className='mt-1'>
           Submit
         </Button>
       </Form>
-      {createMessage && (
-        <div className="text-center mt-3 text-success">{createMessage}</div>
-      )}
     </div>
+    // )}
+    // {createMessage && (
+    //   <div className='text-center mt-3 text-success'>{createMessage}</div>
+    // )}
+    // </div>
   );
 };
 
